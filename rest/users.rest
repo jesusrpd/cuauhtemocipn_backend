@@ -1,1 +1,22 @@
 GET http://localhost:3001/api/getUsers
+
+####
+
+POST http://localhost:3001/api/signup
+content-type: application/json
+
+{
+    "name": "jesus",
+    "email": "jesusrodrigo881@gmail.com",
+    "password": "30092002"
+}
+
+####
+
+POST http://localhost:3001/api/login
+content-type: application/json
+
+{
+    "email": "jesusrodrigo881@gmail.com",
+    "password": "30092002"
+}
