@@ -7,6 +7,7 @@ import http from 'http';
 import config from './utils/config.js';
 import connectDB from './db.js';
 import user_routes from './routes/user.routes.js';
+import giveways_routes from './routes/giveways.routes.js';
 const app = express();
 
 connectDB(); //Conección a la BD
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', user_routes);
+app.use('/api', giveways_routes);
 
 const server = http.createServer(app)
 // Iniciar el servidor
