@@ -19,13 +19,10 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
     const {email, password} = req.body;
     const user = await userModel.findOne({email});
-    console.log(user);
-    if(!user) res.status(400).json({success: false, data: "User not found"});
-    console.log(password);
+    if(!user) res.status(400).json({success: false, data: "User not found"});;
 
     const verify_password = await user.comparePassword(password);
     if(!verify_password) res.status(404).json({success: false, data: "Passowrd incorrect"});
-
 
     const token = jwt.sign({id: user._id}, config.SECRET);
     res.status(200).json({success: true, data: {token, user}});
