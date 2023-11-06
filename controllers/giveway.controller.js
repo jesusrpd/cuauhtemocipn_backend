@@ -9,7 +9,7 @@ const getGiveways = async (req, res) => {
 }
 
 const createGiveway = async (req, res) => {
-    const {title, total_tickets, awards, bases, expiration_date, user_id} = req.body;
+    const {title, total_tickets, awards, bases, expiration_date, user_id, cost_for_ticket} = req.body;
 
     // Almacenamos primero las img de los awards
     const s3 = new AWS.S3({
@@ -32,7 +32,7 @@ const createGiveway = async (req, res) => {
             return {...award, img: data.Location};
     
         }))
-        const new_giveway = new GivaweyModel({title, total_tickets, bases, expiration_date, user_id, awards: awards_upload});
+        const new_giveway = new GivaweyModel({title, total_tickets, bases, expiration_date, user_id, awards: awards_upload, cost_for_ticket});
         await new_giveway.save();
         res.status(201).json({success: true, data: new_giveway});
         
@@ -72,7 +72,8 @@ const getGivewayOnly = async (req, res) => {
             total_tickets: giveway.total_tickets,
             expiration_date: giveway.expiration_date,
             bases: giveway.bases,
-            awards: imgs_awards
+            awards: imgs_awards,
+            cost_for_ticket: giveway.cost_for_ticket
         }
         res.status(200).json({success: true, data: giveway_with_imgs});
     } catch (error) {

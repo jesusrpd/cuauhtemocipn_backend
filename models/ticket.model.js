@@ -21,7 +21,7 @@ const ticket_schema = new Schema({
 		type: String,
 		require: true
 	},
-	phote:{
+	phone:{
 		type: String,
 		require: true
 	},

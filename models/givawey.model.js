@@ -36,6 +36,10 @@ const givawey_schema = new Schema({
     user_id: {
         type: Schema.Types.ObjectId,
         ref: "User"
+    },
+    cost_for_ticket: {
+        type: Number,
+        require: true
     }
 });
 
