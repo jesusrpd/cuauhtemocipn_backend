@@ -6,9 +6,9 @@ POST http://localhost:3001/api/signup
 content-type: application/json
 
 {
-    "name": "jesus",
-    "email": "jesusrodrigo881@gmail.com",
-    "password": "30092002"
+    "name": "cuahtemoc",
+    "email": "cuauhtemocipn@gmail.com",
+    "password": "cuau_26_ipn"
 }
 
 ####

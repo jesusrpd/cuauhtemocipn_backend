@@ -10,9 +10,11 @@ import user_routes from './routes/user.routes.js';
 import giveways_routes from './routes/giveways.routes.js';
 const app = express();
 
+app.use(cors({
+  origin: process.env.URL_FRONT
+}));
 connectDB(); //Conección a la BD
 
-app.use(cors());
 // Configurar body-parser para manejar solicitudes POST
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({ extended: true, limit: '100mb' }));
