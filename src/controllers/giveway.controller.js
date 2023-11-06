@@ -1,6 +1,7 @@
 import GivaweyModel from "../models/givawey.model.js";
 import config from "../utils/config.js";
 import AWS from 'aws-sdk';
+import sharp from 'sharp';
 
 const getGiveways = async (req, res) => {
     const giveways = await GivaweyModel.find();
@@ -24,9 +25,8 @@ const createGiveway = async (req, res) => {
     
             const params = {
                 Bucket: "img-awards",
-                Key: `${award.name}_${award.model}`,
+                Key: `${award.name}_${award.model}.jpeg`,
                 Body: imgaeBuffer,
-                ContentType: "image/jpeg",
             }
             const data = await s3.upload(params).promise();
             return {...award, img: data.Location};
@@ -42,4 +42,43 @@ const createGiveway = async (req, res) => {
     }
 }
 
-export default {getGiveways, createGiveway }
+const getGivewayOnly = async (req, res) => {
+    const giveway = await GivaweyModel.findOne({_id: req.params.id});
+
+    if(!giveway) res.status(404).json({success: false, data: "Rifa no encontrada"});
+    const s3 = new AWS.S3({
+        accessKeyId: config.ACCESS_KEY_ID,
+        secretAccessKey: config.SECRET_ACCESS_KEY,
+        region: config.REGION
+    });
+    try {
+        const imgs_awards = await Promise.all(giveway.awards.map( async award => {
+            const params = {
+                Bucket: "img-awards",
+                Key: `${award.name}_${award.model}.jpeg`,
+            }
+            const imgAward = await s3.getObject(params).promise();
+            const imgBase64 = imgAward.Body.toString("base64");
+            return{
+                name: award.name,
+                model: award.model,
+                img:`data:image/jpeg;base64,${imgBase64}`
+            }
+        }))
+        console.log('ya se obtuvieron todas las img--------');
+        console.log(imgs_awards);
+        const giveway_with_imgs = {
+            title: giveway.title,
+            total_tickets: giveway.total_tickets,
+            expiration_date: giveway.expiration_date,
+            bases: giveway.bases,
+            awards: imgs_awards
+        }
+        res.status(200).json({success: true, data: giveway_with_imgs});
+    } catch (error) {
+        console.error("Error al obtener las imgadenes de Amazon S3", error);
+        res.status(500).json({ success: false, error: "Ocurrió un error al subir las imágenes" });
+    }
+}
+
+export default {getGiveways, createGiveway, getGivewayOnly }
