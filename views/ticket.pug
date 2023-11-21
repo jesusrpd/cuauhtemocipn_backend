@@ -1,0 +1,31 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com")
+    link(href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Raleway:wght@300;500;600;700&family=Roboto:wght@300;400;500;700;900&display=swap", rel="stylesheet")
+    title= datos.name
+  body(style="background-color: #edf2f7; width:100%; min-height:100vh; display:flex;justify-content:center;align-items:center; flex-wrap: wrap;")
+    each ticket in datos.numbers
+      div(style="width: 323px; height: 482px; position: relative; display: flex; align-items: start; flex-direction: column; justify-content: end; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 20px; padding: 1rem;margin:10px;")
+        div(style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-image: url('/bg-space.png'); background-size: cover; bacground-repeat:none;z-index:5;border-radius: 20px;")
+        div(style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background: #222633; opacity: .4;z-index:10;border-radius: 20px;")
+        img(src="/cuauh-white.png", alt="icon cuauhtemoc",style="position: absolute; top: 40px; left: 0px; width: 257px; height: 258px; z-index:20;")
+        img(src=qrContent, alt="Códig QR", style="position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; z-index:20; border-radius: 10px;")
+        p(style="text-align:center;font-size:28px;color:white;font-weight:bold; position:absolute;right:20px;top:250px;z-index:50;font-family:'Roboto', sans-serif;")
+          | BOLETO
+          br
+          | #{ticket}
+        p(style="font-weight:bold;font-size:20px;color: white;z-index:50;font-family:'Roboto', sans-serif;text-align:center;line-height:30px;margin-bottom:15px;") 
+          | CUAUHTÉMOC IPN
+          br
+          | AEROESPACE
+        div(style="z-index: 50;") 
+          h1(style="font-size: 14px; font-weight: bold; margin-bottom: 1rem; color: #FAA500; font-family:'Roboto', sans-serif; text-shadow: 1px 1px 16px rgba(250, 165, 0, .45);") Nombre: 
+            span(style="color: white; text-shadow: none;") #{datos.name}
+          h1(style="font-size: 14px; font-weight: bold; margin-bottom: 1rem; color: #FAA500; font-family:'Roboto', sans-serif; text-shadow: 1px 1px 16px rgba(250, 165, 0, .45);") Correo: 
+            span(style="color: white; text-shadow: none;") #{datos.email}
+          h1(style="font-size: 14px; font-weight: bold; margin-bottom: 1rem; color: #FAA500; font-family:'Roboto', sans-serif; text-shadow: 1px 1px 16px rgba(250, 165, 0, .45);") Teléfono: 
+            span(style="color: white; text-shadow: none;") #{datos.phone}

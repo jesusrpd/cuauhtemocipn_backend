@@ -1,0 +1,18 @@
+GET http://localhost:3001/api/tickets/655b99d9589b4019bc63d231
+
+###
+
+POST http://localhost:3001/api/tickets/buy
+Content-Type: application/json
+
+{
+    "numbers":[20,25,40],
+    "last_name": "Pérez",
+	"mothet_last_name":"Delgado",
+	"name": "Jesús Rodrigo",
+	"email": "jesusrodrigo881@gmail.com",
+	"phone":"5512391560",
+    "method_payment": "mercado pago",
+    "date_shop": "JSON.stringfy()",
+    "giveway_id": "65498547273efc68192d6aa8"
+}

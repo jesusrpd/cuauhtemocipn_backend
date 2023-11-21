@@ -9,7 +9,7 @@ const ticket_schema = new Schema({
         type: String,
 		require: true
     },
-	mothet_last_name:{
+	mother_last_name:{
 		type: String,
 		require: true
 	},
@@ -25,10 +25,10 @@ const ticket_schema = new Schema({
 		type: String,
 		require: true
 	},
-    method_payment: {
-        type: String,
-        required: true
-    },
+    // method_payment: {
+    //     type: String,
+    //     required: true
+    // },
     date_shop: {
         type: Date,
         default: Date.now
@@ -36,7 +36,14 @@ const ticket_schema = new Schema({
     giveway_id: {
         type: Schema.Types.ObjectId,
         ref: "Giveway"
-    }
+    },
+	payment_photo: {
+		type: String,
+	},
+	confirm_payment: {
+		type: Boolean,
+		default: false
+	}
 });
 
 export default model("Ticket", ticket_schema);

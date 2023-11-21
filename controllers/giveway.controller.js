@@ -1,7 +1,9 @@
 import GivaweyModel from "../models/givawey.model.js";
 import config from "../utils/config.js";
 import AWS from 'aws-sdk';
+import TicketModel from '../models/ticket.model.js';
 import sharp from 'sharp';
+import fs from 'fs'
 
 const getGiveways = async (req, res) => {
     const giveways = await GivaweyModel.find();
@@ -21,12 +23,13 @@ const createGiveway = async (req, res) => {
         const awards_upload = await Promise.all(awards.map( async award => {
     
             const base64Image = award.img;
-            const imgaeBuffer = Buffer.from(base64Image, "base64");
+            const imgBuffer = Buffer.from(base64Image, "base64");
     
             const params = {
                 Bucket: "img-awards",
                 Key: `${award.name}_${award.model}.jpeg`,
-                Body: imgaeBuffer,
+                Body: imgBuffer,
+                ContentType: 'image/jpeg'
             }
             const data = await s3.upload(params).promise();
             return {...award, img: data.Location};
@@ -46,34 +49,36 @@ const getGivewayOnly = async (req, res) => {
     const giveway = await GivaweyModel.findOne({_id: req.params.id});
 
     if(!giveway) res.status(404).json({success: false, data: "Rifa no encontrada"});
-    const s3 = new AWS.S3({
-        accessKeyId: config.ACCESS_KEY_ID,
-        secretAccessKey: config.SECRET_ACCESS_KEY,
-        region: config.REGION
-    });
+    // const s3 = new AWS.S3({
+    //     accessKeyId: config.ACCESS_KEY_ID,
+    //     secretAccessKey: config.SECRET_ACCESS_KEY,
+    //     region: config.REGION
+    // });
     try {
-        const imgs_awards = await Promise.all(giveway.awards.map( async award => {
-            const params = {
-                Bucket: "img-awards",
-                Key: `${award.name}_${award.model}.jpeg`,
-            }
-            const imgAward = await s3.getObject(params).promise();
-            const imgBase64 = imgAward.Body.toString("base64");
-            return{
-                name: award.name,
-                model: award.model,
-                img:`data:image/jpeg;base64,${imgBase64}`
-            }
-        }))
-        console.log('ya se obtuvieron todas las img--------');
-        console.log(imgs_awards);
+        // const imgs_awards = await Promise.all(giveway.awards.map( async award => {
+        //     const params = {
+        //         Bucket: "img-awards",
+        //         Key: `${award.name}_${award.model}.jpeg`,
+        //     }
+        //     const imgAward = await s3.getObject(params).promise();
+        //     const imgBase64 = imgAward.Body.toString("base64");
+        //     return{
+        //         name: award.name,
+        //         model: award.model,
+        //         img:`data:image/png;base64,${imgBase64}`
+        //     }
+        // }))
+        const tickets = await TicketModel.find({giveway_id: giveway._id});
+        let numbers_tickets = []
+        tickets.map( t => numbers_tickets = numbers_tickets.concat(t.numbers))
         const giveway_with_imgs = {
             title: giveway.title,
             total_tickets: giveway.total_tickets,
             expiration_date: giveway.expiration_date,
             bases: giveway.bases,
-            awards: imgs_awards,
-            cost_for_ticket: giveway.cost_for_ticket
+            awards: giveway.awards,
+            cost_for_ticket: giveway.cost_for_ticket,
+            purchased_tickets: numbers_tickets
         }
         res.status(200).json({success: true, data: giveway_with_imgs});
     } catch (error) {
@@ -82,4 +87,23 @@ const getGivewayOnly = async (req, res) => {
     }
 }
 
-export default {getGiveways, createGiveway, getGivewayOnly }
+const getAwards = async (req, res) => {
+    console.log(req.body);
+    const s3 = new AWS.S3({
+        accessKeyId: config.ACCESS_KEY_ID,
+        secretAccessKey: config.SECRET_ACCESS_KEY,
+        region: config.REGION
+    });
+    const imgs_awards = await Promise.all(req.body.awards.map( async award => {
+        const params = {
+            Bucket: "img-awards",
+            Key: `${award.name}_${award.model}.jpeg`,
+        }
+        const imgAward = await s3.getObject(params).promise();
+        // const imgBase64 = imgAward.Body.toString("base64");
+        console.log(imgAward.Body);
+    }))
+    res.status(200).json({success: true, data: "se obtuvo todo"});
+}
+
+export default {getGiveways, createGiveway, getGivewayOnly, getAwards }
