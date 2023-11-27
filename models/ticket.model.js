@@ -43,6 +43,11 @@ const ticket_schema = new Schema({
 	confirm_payment: {
 		type: Boolean,
 		default: false
+	},
+	type: {
+		type: String,
+		default: "online",
+		require: true
 	}
 });
 

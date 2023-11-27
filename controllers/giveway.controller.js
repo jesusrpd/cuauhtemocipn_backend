@@ -11,31 +11,40 @@ const getGiveways = async (req, res) => {
 }
 
 const createGiveway = async (req, res) => {
-    const {title, total_tickets, awards, bases, expiration_date, user_id, cost_for_ticket} = req.body;
-
+    console.log(req.files);
+    console.log(req.body);
+    console.log(JSON.parse(req.body.awards))
     // Almacenamos primero las img de los awards
-    const s3 = new AWS.S3({
+    let s3 = new AWS.S3({
         accessKeyId: config.ACCESS_KEY_ID,
         secretAccessKey: config.SECRET_ACCESS_KEY,
         region: config.REGION
     });
     try {
-        const awards_upload = await Promise.all(awards.map( async award => {
-    
-            const base64Image = award.img;
-            const imgBuffer = Buffer.from(base64Image, "base64");
-    
-            const params = {
+        let awards_with_url_img = [];
+        let awards = JSON.parse(req.body.awards);
+        for(let i=0; i< awards.length;i++){
+            let file = req.files[i];
+            let params = {
                 Bucket: "img-awards",
-                Key: `${award.name}_${award.model}.jpeg`,
-                Body: imgBuffer,
-                ContentType: 'image/jpeg'
+                Key: `${awards[i].name}_${awards[i].model}.jpg`,
+                Body: file.buffer,
             }
-            const data = await s3.upload(params).promise();
-            return {...award, img: data.Location};
-    
-        }))
-        const new_giveway = new GivaweyModel({title, total_tickets, bases, expiration_date, user_id, awards: awards_upload, cost_for_ticket});
+            await s3.upload(params).promise();
+            awards_with_url_img = awards_with_url_img.concat({...awards[i], img: `${awards[i].name}_${awards[i].model}.jpg`})
+            console.log('se subio una');
+        }
+
+        console.log('se subieron todas las img');
+        const giveway_obj = {
+            title: req.body.title,
+            cost_for_ticket: req.body.cost_for_ticket,
+            expiration_date: req.body.expiration_date,
+            total_tickets: req.body.total_tickets,
+            awards: awards_with_url_img,
+            bases: JSON.parse(req.body.bases)
+        }
+        const new_giveway = new GivaweyModel(giveway_obj);
         await new_giveway.save();
         res.status(201).json({success: true, data: new_giveway});
         
@@ -49,26 +58,26 @@ const getGivewayOnly = async (req, res) => {
     const giveway = await GivaweyModel.findOne({_id: req.params.id});
 
     if(!giveway) res.status(404).json({success: false, data: "Rifa no encontrada"});
-    // const s3 = new AWS.S3({
-    //     accessKeyId: config.ACCESS_KEY_ID,
-    //     secretAccessKey: config.SECRET_ACCESS_KEY,
-    //     region: config.REGION
-    // });
+    const s3 = new AWS.S3({
+        accessKeyId: config.ACCESS_KEY_ID,
+        secretAccessKey: config.SECRET_ACCESS_KEY,
+        region: config.REGION
+    });
     try {
-        // const imgs_awards = await Promise.all(giveway.awards.map( async award => {
-        //     const params = {
-        //         Bucket: "img-awards",
-        //         Key: `${award.name}_${award.model}.jpeg`,
-        //     }
-        //     const imgAward = await s3.getObject(params).promise();
-        //     const imgBase64 = imgAward.Body.toString("base64");
-        //     return{
-        //         name: award.name,
-        //         model: award.model,
-        //         img:`data:image/png;base64,${imgBase64}`
-        //     }
-        // }))
-        const tickets = await TicketModel.find({giveway_id: giveway._id});
+        const imgs_awards = await Promise.all(giveway.awards.map( async award => {
+            const params = {
+                Bucket: "img-awards",
+                Key: award.img,
+            }
+            const imgAward = await s3.getObject(params).promise();
+            const imgBase64 = imgAward.Body.toString("base64");
+            return{
+                name: award.name,
+                model: award.model,
+                img:`data:image/png;base64,${imgBase64}`
+            }
+        }))
+        const tickets = await TicketModel.find({giveway_id: giveway._id, type: "online"});
         let numbers_tickets = []
         tickets.map( t => numbers_tickets = numbers_tickets.concat(t.numbers))
         const giveway_with_imgs = {
@@ -76,7 +85,7 @@ const getGivewayOnly = async (req, res) => {
             total_tickets: giveway.total_tickets,
             expiration_date: giveway.expiration_date,
             bases: giveway.bases,
-            awards: giveway.awards,
+            awards: imgs_awards,
             cost_for_ticket: giveway.cost_for_ticket,
             purchased_tickets: numbers_tickets
         }

@@ -53,7 +53,9 @@ const renderTickets = async (req, res) => {
         phone: ticket.phone,
         numbers: ticket.numbers
     };
-    const qrContent = "Boleto de prueba";
+    const payload = ticket._id;
+    const token = jwt.sign({payload}, config.SECRET_KEY_TICKETS);
+    const qrContent = `${config.URL_FRONT}/verify-ticket/${token}/${payload}`;
     qr.toDataURL(qrContent, (err, qrContent) => {
         if(err){
             console.log(err);
@@ -123,7 +125,8 @@ const submitTicketsExcel = async (req, res) => {
             date_shop: datejs,
             giveway_id: req.body.giveway_id,
             payment_photo: "SUBMITEXCEL",
-            confirmPayment: true
+            confirmPayment: true,
+            type: "physical"
         }
         console.log(format_ticket)
         const new_ticket = new TicketModel(format_ticket);
@@ -132,4 +135,20 @@ const submitTicketsExcel = async (req, res) => {
     res.json({success: true, data: 'archivo subido'});
 }
 
-export default { getTicketsByGiveway, buyTicket, renderTickets, confirmPayment, generateTokenForTicket, submitTicketsExcel }
+const authTicket = async (req, res) => {
+    try {
+        console.log(req.body);
+        const token = req.body[0];
+        const decoded = jwt.verify(token, config.SECRET_KEY_TICKETS);
+        const ticket = await TicketModel.findOne({_id: req.body[1]});
+        if(decoded && ticket){
+            res.json({success: true, message: 'Ticket verificado'})
+        }else{
+            res.json({success: false, message: "Tciket falso"})
+        }
+    } catch (error) {
+        res.json({success: false, message: "Tciket falso"})
+    }
+}
+
+export default { getTicketsByGiveway, buyTicket, renderTickets, confirmPayment, generateTokenForTicket, submitTicketsExcel, authTicket }
