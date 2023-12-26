@@ -12,6 +12,8 @@ router.post('/createGiveway', [verifyAuth, upload.array('images')], givewayContr
 
 router.get('/getGiveway/:id', givewayController.getGivewayOnly);
 
-router.post('/getAwards', givewayController.getAwards)
+router.post('/getAwards', givewayController.getAwards);
+
+router.put('/giveway/:id', verifyAuth, givewayController.updateGiveway)
 
 export default router;

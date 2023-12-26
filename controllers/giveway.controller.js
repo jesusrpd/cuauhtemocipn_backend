@@ -32,10 +32,8 @@ const createGiveway = async (req, res) => {
             }
             await s3.upload(params).promise();
             awards_with_url_img = awards_with_url_img.concat({...awards[i], img: `${awards[i].name}_${awards[i].model}.jpg`})
-            console.log('se subio una');
         }
 
-        console.log('se subieron todas las img');
         const giveway_obj = {
             title: req.body.title,
             cost_for_ticket: req.body.cost_for_ticket,
@@ -115,4 +113,17 @@ const getAwards = async (req, res) => {
     res.status(200).json({success: true, data: "se obtuvo todo"});
 }
 
-export default {getGiveways, createGiveway, getGivewayOnly, getAwards }
+const updateGiveway = async (req, res) =>{
+    const body_update = req.body;
+    console.log(body_update)
+    try {
+        console.log(req.params.id)
+        const giveway_update = await GivaweyModel.findOneAndUpdate({_id: req.params.id}, body_update, {new: true});
+        res.status(201).json({success: true, data: giveway_update})
+    } catch (error) {
+        res.status(502).json({success: false, data: "Fallo al actualizar rifa"})
+    }
+
+}
+
+export default {getGiveways, createGiveway, getGivewayOnly, getAwards, updateGiveway }
